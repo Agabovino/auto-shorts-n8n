@@ -10,6 +10,21 @@ services:
       - WEBHOOK_URL=http://localhost:5678
     volumes:
       - n8n_data:/home/node/.n8n
+    networks:
+      - n8n-network
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - n8n
+    networks:
+      - n8n-network
 
 volumes:
   n8n_data:
+
+networks:
+  n8n-network:
