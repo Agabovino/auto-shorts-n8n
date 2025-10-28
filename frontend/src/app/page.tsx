@@ -15,6 +15,7 @@ interface GroupedVideos {
 export default function Home() {
   const [videos, setVideos] = useState<GroupedVideos>({})
   const [selectedVideos, setSelectedVideos] = useState<{ [key: string]: Video }>({});
+  const [useTestWebhook, setUseTestWebhook] = useState(false);
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -58,7 +59,9 @@ export default function Home() {
   };
 
   const handleSendToWebhook = async () => {
-    const webhookUrl = 'http://localhost:5678/webhook/75a21675-c87e-49a9-9d3c-d7fe7c3893e9';
+    const webhookUrl = useTestWebhook
+      ? 'http://localhost:5678/webhook-test/75a21675-c87e-49a9-9d3c-d7fe7c3893e9'
+      : 'http://localhost:5678/webhook/75a21675-c87e-49a9-9d3c-d7fe7c3893e9';
     const videosToSend = Object.values(selectedVideos);
 
     if (videosToSend.length === 0) {
@@ -88,7 +91,7 @@ export default function Home() {
   };
 
   const handleClearSelection = () => {
-    setSelectedVideos({});
+    setVideos({})
   };
 
   const sliderSettings = {
@@ -123,6 +126,11 @@ export default function Home() {
         <h1 className="text-2xl font-bold">Video Player</h1>
         <div>
           <button
+            onClick={() => setUseTestWebhook(!useTestWebhook)}
+            className={`font-bold py-2 px-4 rounded mr-2 ${useTestWebhook ? 'bg-yellow-500 hover:bg-yellow-700' : 'bg-gray-500 hover:bg-gray-700'}`}>
+            {useTestWebhook ? 'Using Test Webhook' : 'Using Prod Webhook'}
+          </button>
+          <button
             onClick={handleSendToWebhook}
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2"
           >
@@ -132,7 +140,7 @@ export default function Home() {
             onClick={handleClearSelection}
             className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
           >
-            Clear Selection
+            Clear
           </button>
         </div>
       </div>
