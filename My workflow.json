@@ -1,0 +1,247 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        -688
+      ],
+      "id": "a5ae8e57-b067-4293-9af2-726462984786",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "path": "75a21675-c87e-49a9-9d3c-d7fe7c3893e9",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -112,
+        -336
+      ],
+      "id": "91ccc4a5-15bc-48bd-a47e-61e6838029a0",
+      "name": "Webhook",
+      "webhookId": "75a21675-c87e-49a9-9d3c-d7fe7c3893e9"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "I'm creating a video programmatically using an API.\nThe API needs scenes to work with.\n\nEach scene requires:\n\nA text that will be turned into speech.\n\n2–3 one-word search terms that will be used to pull background videos from the Pexels API.\n\nYour job is to create a short 4-scene video around any viral or curious topic — like strange science, forgotten history, bizarre human body facts, creepy internet stories, or hidden movie details. These videos are meant for TikTok and YouTube Shorts, so they should be fast, attention-grabbing, and packed with curiosity.\n\nThe channel name is “quiick curioss.” Each scene should feel unique, weird, or shocking — something that would make someone say “No way… I need to know more.”\n\nMany videos should start with lines like:\n\n“Did you know…”\n\n“Have you ever heard of…”\n\n“What would you do if…”\n\n“Here’s something you won’t believe…”\n\nMake sure each time you:\n\nChoose a new viral topic — don’t repeat.\n\nKeep the tone curious, strange, or mysterious.\n\nEnd the last scene with a twist or a hook.\n\nYour goal is to make viewers stop scrolling, feel intrigued, and want to watch more videos from quiick curioss.\n\nSend it in JSON format, with no additional text, with the following structure:\n{\n  \"extractedData\": {\n    \"scenes\": [\n      {\n        \"text\": \"Complete text of the first scene here...\",\n        \"searchTerms\": [\"term1\", \"term2\", \"term3\"]\n      },\n      {\n        \"text\": \"Complete text of the second scene here...\", \n        \"searchTerms\": [\"term1\", \"term2\", \"term3\"]\n      }\n      // ... more scenes if needed\n    ]\n  }\n}\n\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        80,
+        -688
+      ],
+      "id": "a327e5e6-fc74-422b-b0f7-87f6c9ca7d55",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "fYvDY9k8voyhYXU0",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nreturn items.map(item => {\n\n    const rawContent = $input.first().json.message.content;\n    const jsonRegex = /```json\\s*([\\s\\S]*?)\\s*```/g;\n    const match = jsonRegex.exec(rawContent);\n    \n    let extractedObject = {};\n    \n    if (match && match[1]) {\n        try {\n\n            const jsonString = match[1].trim();\n            extractedObject = JSON.parse(jsonString);\n            \n        } catch (error) {\n\n            console.error(\"Erro ao fazer parse do JSON:\", error);\n        }\n    }\n\n    return {\n        json: {\n            extractedData: extractedObject\n        }\n    };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        368,
+        -688
+      ],
+      "id": "46412d9c-a763-46e5-811f-b11c5011118c",
+      "name": "Filtrar resposta LLM"
+    },
+    {
+      "parameters": {
+        "url": "https://api.pexels.com/videos/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $json.searchTerms[0] }}, {{ $json.searchTerms[1] }}, {{ $json.searchTerms[2] }}"
+            },
+            {
+              "name": "per_page",
+              "value": "10"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "JkGnLyT7Ur73AQiZMA2WdozKuCJsH9WscWDVn60ELxQBTyoj3cP44qcs"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        784,
+        -816
+      ],
+      "id": "b9e1766a-824f-4332-b64c-09eb10fc33cb",
+      "name": "Req. Pexels"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Código para n8n - Apenas searchTerms (corrigido)\nconst items = $input.all();\nconst result = [];\n\nfor (const item of items) {\n  const scenes =$input.first().json.extractedData.extractedData.scenes ;\n  \n  // Extrair apenas os arrays de searchTerms de cada cena\n  const searchTermGroups = scenes.map(scene => scene.searchTerms || []);\n  \n  // Para cada grupo de searchTerms, criar um objeto de saída\n  searchTermGroups.forEach(group => {\n    result.push({\n      json: {\n        searchTerms: group\n      }\n    });\n  });\n}\n\nreturn result;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        -688
+      ],
+      "id": "421a0fa5-88a5-48a7-bf4b-3e29ffebed0d",
+      "name": "Extrair key-words"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://frontend:3000/api/videos",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "link",
+              "value": "={{ $json.result }}"
+            },
+            {
+              "name": "=category",
+              "value": "={{ $('Extrair key-words').item.json.searchTerms[0] }}, {{ $('Extrair key-words').item.json.searchTerms[1] }}, {{ $('Extrair key-words').item.json.searchTerms[2] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1216,
+        -864
+      ],
+      "id": "335f23b7-28d5-4297-87ee-84e3b4b4e9ba",
+      "name": "Enviar para o front"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// n8n Code Node\nlet result = [];\nconst videos = $json.videos;\n\nfor (let i = 0; i < videos.length; i++) {\n  const videoFiles = videos[i].video_files;\n  // Ordena por largura (width) decrescente\n  const sorted = videoFiles.sort((a, b) => b.width - a.width);\n  // Pega o primeiro (maior qualidade)\n  if (sorted.length > 0) {\n    result.push(sorted[0].link);\n  }\n}\n\nreturn { result };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1008,
+        -864
+      ],
+      "id": "eb7e766f-0bd6-4cca-b1f2-d4c0a912bb59",
+      "name": "Filtrar links"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Filtrar resposta LLM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar resposta LLM": {
+      "main": [
+        [
+          {
+            "node": "Extrair key-words",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Req. Pexels": {
+      "main": [
+        [
+          {
+            "node": "Filtrar links",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair key-words": {
+      "main": [
+        [
+          {
+            "node": "Req. Pexels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar links": {
+      "main": [
+        [
+          {
+            "node": "Enviar para o front",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c1767714-6724-4df3-a767-ed5c05c693df",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "12da1bedc4a72a8d47cef5c31bbf8c63ee668eb4e96a4700943ceaa47f337ec3"
+  },
+  "id": "13Lda7Lk6kyN7CBO",
+  "tags": []
+}

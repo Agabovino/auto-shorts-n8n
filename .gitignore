@@ -1,0 +1,13 @@
+# Dependencies
+/node_modules
+/frontend/node_modules
+
+# Build artifacts
+/frontend/.next
+
+# Local environment variables
+.env
+.env.local
+
+# Scripts
+script.sh

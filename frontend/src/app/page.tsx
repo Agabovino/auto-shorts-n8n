@@ -18,10 +18,20 @@ export default function Home() {
   useEffect(() => {
     const fetchVideos = async () => {
       const response = await fetch('/api/videos');
-      const data: Video[] = await response.json();
+      const newData: { link: string[], category: string }[] = await response.json();
       
+      const flattenedData: Video[] = [];
+      if (Array.isArray(newData)) {
+        newData.forEach(item => {
+          const category = item.category;
+          item.link.forEach(link => {
+            flattenedData.push({ link, category });
+          });
+        });
+      }
+
       const grouped: GroupedVideos = {};
-      data.forEach(video => {
+      flattenedData.forEach(video => {
         const category = video.category;
         if (!grouped[category]) {
           grouped[category] = [];
@@ -74,10 +84,9 @@ export default function Home() {
           <Slider {...sliderSettings}>
             {videos[category].map((video, index) => (
               <div key={index} className="px-2">
-                <div className="border rounded-lg overflow-hidden">
-                  <video controls src={video.link} className="w-full" />
-                </div>
-              </div>
+                                  <div className="video-container">
+                                    <video controls src={video.link} />
+                                  </div>              </div>
             ))}
           </Slider>
         </div>
