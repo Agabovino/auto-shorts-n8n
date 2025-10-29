@@ -7,6 +7,7 @@ This repository provides a Docker-based environment for running N8N and a Next.j
 *   **N8N:** A free and open-source workflow automation tool.
 *   **ffmpeg:** A complete, cross-platform solution to record, convert and stream audio and video.
 *   **yt-dlp:** A command-line program to download videos from YouTube and other video sites.
+*   **Whisper:** A general-purpose speech recognition model from OpenAI.
 *   **Next.js:** A React framework for building user interfaces.
 
 ## Getting Started
