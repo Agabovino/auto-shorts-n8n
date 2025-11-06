@@ -15,12 +15,6 @@ RUN apk add --no-cache \
 # Install yt-dlp
 RUN pip3 install --break-system-packages yt-dlp
 
-# Install whisper
-RUN git clone https://github.com/openai/whisper.git /app/whisper
-WORKDIR /app/whisper
-RUN pip3 install --break-system-packages -r requirements.txt && \
-    pip3 install --break-system-packages -e .
-
 # Set up a working directory for the application
 WORKDIR /data
 

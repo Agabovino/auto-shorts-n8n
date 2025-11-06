@@ -13,6 +13,7 @@ services:
       - N8N_CORS_ALLOW_HEADERS=Content-Type
     volumes:
       - n8n_data:/home/node/.n8n
+      - ./videos:/videos
     networks:
       - n8n-network
 
@@ -23,6 +24,15 @@ services:
       - "3000:3000"
     depends_on:
       - n8n
+    networks:
+      - n8n-network
+
+  whisper:
+    build:
+      context: .
+      dockerfile: whisper.Dockerfile
+    ports:
+      - "9000:9000"
     networks:
       - n8n-network
 

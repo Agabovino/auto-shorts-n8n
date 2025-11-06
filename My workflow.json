@@ -14,14 +14,16 @@
     },
     {
       "parameters": {
+        "httpMethod": "POST",
         "path": "75a21675-c87e-49a9-9d3c-d7fe7c3893e9",
+        "responseMode": "responseNode",
         "options": {}
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
         -112,
-        -336
+        -480
       ],
       "id": "91ccc4a5-15bc-48bd-a47e-61e6838029a0",
       "name": "Webhook",
@@ -66,7 +68,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        368,
+        384,
         -688
       ],
       "id": "46412d9c-a763-46e5-811f-b11c5011118c",
@@ -102,8 +104,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        784,
-        -816
+        768,
+        -688
       ],
       "id": "b9e1766a-824f-4332-b64c-09eb10fc33cb",
       "name": "Req. Pexels"
@@ -143,8 +145,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1216,
-        -864
+        1120,
+        -688
       ],
       "id": "335f23b7-28d5-4297-87ee-84e3b4b4e9ba",
       "name": "Enviar para o front"
@@ -157,11 +159,37 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1008,
-        -864
+        944,
+        -688
       ],
       "id": "eb7e766f-0bd6-4cca-b1f2-d4c0a912bb59",
       "name": "Filtrar links"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        240,
+        -480
+      ],
+      "id": "4b41d175-d44a-4b24-b1ce-4264ff3ca23d",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        48,
+        -480
+      ],
+      "id": "04dff936-8489-4311-8644-2d6b13eb3e2a",
+      "name": "Code in JavaScript"
     }
   ],
   "pinData": {},
@@ -231,13 +259,37 @@
           }
         ]
       ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
-  "versionId": "c1767714-6724-4df3-a767-ed5c05c693df",
+  "versionId": "363d5c39-5584-4150-8509-1ecd3a6b4ee8",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "12da1bedc4a72a8d47cef5c31bbf8c63ee668eb4e96a4700943ceaa47f337ec3"
